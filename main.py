@@ -2,7 +2,7 @@ import torchxrayvision as xrv
 import skimage, torch, torchvision
 
 # Prepare the image:
-img = skimage.io.imread("chest.jpg")
+img = skimage.io.imread("images/chest.jpg")
 img = xrv.datasets.normalize(img, 255) # convert 8-bit image to [-1024, 1024] range
 img = img.mean(2)[None, ...] # Make single color channel
 
