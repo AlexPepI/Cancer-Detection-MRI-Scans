@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
+import matplotlib.pyplot as plt
+import matplotlib,os
 
 from template_model import MLP
 
@@ -69,13 +71,33 @@ def main():
     
     model.eval()
     with torch.no_grad():
-        xs = torch.tensor([[-2.0], [-1.2], [0.4], [0.95], [2.0]], device=device)
-        ys = xs**2
-        yhat = model(xs)
-        print("\nx, x^2, pred:")
-        for xi, yi, pi in zip(xs.squeeze().cpu(), ys.squeeze().cpu(), yhat.squeeze().cpu()):
-            print(f"{xi:+.2f}  {yi:+.3f}  {pi:+.3f}")
-    
+        xs = torch.linspace(X_MIN, X_MAX, steps=400).unsqueeze(1).to(device)
+        y_true = xs**2
+        y_pred = model(xs)
+
+    xs_np = xs.squeeze().cpu().numpy()
+    y_true_np = y_true.squeeze().cpu().numpy()
+    y_pred_np = y_pred.squeeze().cpu().numpy()
+
+    plt.figure(figsize=(8, 5))
+    # training samples (light scatter), true curve, learned curve
+    plt.scatter(Xtr.squeeze().cpu().numpy(), ytr.squeeze().cpu().numpy(), s=8, alpha=0.25, label="train samples")
+    plt.plot(xs_np, y_true_np, linewidth=2, label="y = x^2")
+    plt.plot(xs_np, y_pred_np, linewidth=2, linestyle="--", label="MLP prediction")
+    plt.xlabel("x"); plt.ylabel("y")
+    plt.title("MLP fit to y = x^2")
+    plt.legend()
+    plt.tight_layout()
+    # Optional: save the figure
+    # plt.show()
+    # plt.savefig("fit_x2.png", dpi=200, bbox_inches="tight")
+    # print("Saved plot to fit_x2.png")
+    headless = (matplotlib.get_backend().lower() == "agg") or (not os.environ.get("DISPLAY"))
+    if headless:
+        plt.savefig("fit_x2.png", dpi=200, bbox_inches="tight")
+        print("Saved plot to fit_x2.png")
+    else:
+        plt.show()
 
 if __name__ == "__main__":
     main()
