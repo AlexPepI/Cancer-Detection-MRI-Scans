@@ -3,6 +3,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 import matplotlib.pyplot as plt
 import matplotlib,os
+import math
 
 from template_model import MLP
 
@@ -13,12 +14,12 @@ BATCH_SIZE = 64
 EPOCHS = 200
 LR = 1e-3
 WEIGHT_DECAY = 1e-5
-EXPAND_DIM = 128 
+EXPAND_DIM = 128
 
 def make_x2_dataset(n=N_SAMPLES, x_min=X_MIN, x_max=X_MAX, seed=42):
     g = torch.Generator().manual_seed(seed)
     x = torch.empty(n, 1).uniform_(x_min, x_max, generator=g)
-    y = x**2  # target function
+    y = x**2 + torch.cos(4*x)# target function
     # optional tiny noise to help optimization:
     # y = y + 0.01 * torch.randn_like(y, generator=g)
     return x.float(), y.float()
@@ -82,8 +83,8 @@ def main():
     plt.figure(figsize=(8, 5))
     # training samples (light scatter), true curve, learned curve
     plt.scatter(Xtr.squeeze().cpu().numpy(), ytr.squeeze().cpu().numpy(), s=8, alpha=0.25, label="train samples")
-    plt.plot(xs_np, y_true_np, linewidth=2, label="y = x^2")
-    plt.plot(xs_np, y_pred_np, linewidth=2, linestyle="--", label="MLP prediction")
+    # plt.plot(xs_np, y_true_np, linewidth=2, label="y = x^2")
+    plt.plot(xs_np, y_pred_np, linewidth=2, linestyle="--", color="red", label="MLP prediction", )
     plt.xlabel("x"); plt.ylabel("y")
     plt.title("MLP fit to y = x^2")
     plt.legend()

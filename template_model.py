@@ -22,18 +22,36 @@ model_urls = {
 #         super(MLP, self).__init__()
 #         self.expand_dim = expand_dim
 #         if self.expand_dim:
-#             self.linear = nn.Linear(input_dim, expand_dim)
+#             self.linear1 = nn.Linear(input_dim, expand_dim)
 #             self.activation = torch.nn.ReLU()
 #             self.linear2 = nn.Linear(expand_dim, num_classes) #softmax is automatically handled by loss function
-#         self.linear = nn.Linear(input_dim, num_classes)
+#         else:
+#             self.linear = nn.Linear(input_dim, num_classes)
 
 #     def forward(self, x):
-#         x = self.linear(x)
-#         if hasattr(self, 'expand_dim') and self.expand_dim:
-#             x = self.activation(x)
+#         if self.expand_dim:
+#             x = self.activation(self.linear1(x))
 #             x = self.linear2(x)
+#         else:
+#             x = self.linear(x)
 #         return x
     
+
+# class MLP(nn.Module):
+#     def __init__(self, input_dim, num_classes, expand_dim=None):
+#         super().__init__()
+#         if expand_dim:  # use a hidden layer
+#             self.net = nn.Sequential(
+#                 nn.Linear(input_dim, expand_dim),
+#                 nn.ReLU(),
+#                 nn.Linear(expand_dim, num_classes)
+#             )
+#         else:  # just a single linear classifier
+#             self.net = nn.Linear(input_dim, num_classes)
+
+#     def forward(self, x):
+#         return self.net(x)
+
 
 class MLP(nn.Module):
     def __init__(self, input_dim, num_classes, expand_dim=None):
@@ -42,6 +60,10 @@ class MLP(nn.Module):
             self.net = nn.Sequential(
                 nn.Linear(input_dim, expand_dim),
                 nn.ReLU(),
+                nn.Linear(expand_dim, expand_dim), ## added another hidden layer. 1 -> 16 -> 16 -> 1
+                nn.ReLU(),
+                # nn.Linear(expand_dim + 64, expand_dim), ## added another hidden layer. 1 -> 16 -> 16 -> 1
+                # nn.ReLU(),
                 nn.Linear(expand_dim, num_classes)
             )
         else:  # just a single linear classifier
